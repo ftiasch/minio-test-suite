@@ -1,0 +1,29 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: warp
+  generateName: warp-job-
+spec:
+  template:
+    metadata:
+      labels:
+        app: warp-job
+    spec:
+      containers:
+      - name: warp-job
+        image: minio/warp:latest
+        imagePullPolicy: IfNotPresent
+        args:
+          - get
+          - --host
+          - minio.myminio.svc.cluster.local:80
+          - --warp-client
+          - "warp-{0...2}.warp.warp.svc.cluster.local:7761"
+          - --obj.size
+          - "10MiB"
+          - --autoterm
+        envFrom:
+          - secretRef:
+              name: warp-env-secret
+      restartPolicy: Never
